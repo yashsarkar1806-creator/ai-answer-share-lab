@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Answer Share Lab — brand visibility in AI assistant answers</title>
+<meta name="description" content="Measure how often AI assistants name your brand vs competitors: mention rate, position-weighted share of voice, engine and buying-stage cuts, cited sources, prompt gaps and a plain-English readout.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Generative engine optimisation (GEO) toolkit</p>
+    <h1>AI Answer Share Lab</h1>
+    <p class="lede">When buyers ask an AI assistant “what’s the best tool for…”, does your brand get named, and in what position? Paste the answers you collected and see share of voice, the prompts you’re missing, and the sources the engines lean on. Everything runs in your browser.</p>
+    <div class="row">
+      <button id="loadDemo" class="primary">Load synthetic demo</button>
+      <a class="ghost" href="#how">How it works</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="card" id="setup">
+    <h2>1. Brands</h2>
+    <p class="hint">One brand per line: <code>Name | alias one, alias two | own</code>. Mark exactly one as <code>own</code>. Matching is whole-word and case-insensitive.</p>
+    <textarea id="brands" rows="5" spellcheck="false"></textarea>
+  </section>
+
+  <section class="card">
+    <h2>2. Prompt panel <span class="tag">optional</span></h2>
+    <p class="hint">Generate a buying-journey prompt set, run each prompt in the assistants you track, and paste the answers back as CSV.</p>
+    <div class="grid3">
+      <label>Category<input id="pCategory" placeholder="e.g. AI meeting note-taker"></label>
+      <label>Audience<input id="pAudience" placeholder="e.g. small remote teams"></label>
+      <label>Use cases (comma-separated)<input id="pUses" placeholder="e.g. sales calls, customer interviews"></label>
+    </div>
+    <div class="row"><button id="makePanel">Generate prompts</button><button id="dlTemplate" disabled>Download CSV template</button></div>
+    <ol id="panel" class="panel"></ol>
+  </section>
+
+  <section class="card">
+    <h2>3. Answers</h2>
+    <p class="hint">CSV columns: <code>prompt, answer</code> (required) plus optional <code>engine, intent, snapshot</code>. Use two or more snapshot dates to see the trend. Aliases like <code>query</code>, <code>response</code>, <code>model</code>, <code>date</code> also work.</p>
+    <div class="row"><input type="file" id="file" accept=".csv,text/csv"><button id="analyse" class="primary">Analyse</button></div>
+    <textarea id="csv" rows="6" spellcheck="false" placeholder="snapshot,engine,intent,prompt,answer"></textarea>
+    <p id="status" class="status" role="status"></p>
+  </section>
+
+  <div id="results" hidden>
+    <section class="kpis" id="kpis"></section>
+
+    <section class="card">
+      <h2>Plain-English readout</h2>
+      <ul id="readout" class="readout"></ul>
+      <div class="row"><button id="copyReadout">Copy readout</button><button id="dlCsv">Download per-answer CSV</button></div>
+    </section>
+
+    <section class="card">
+      <h2>Brand scorecard <span class="tag" id="snapTag"></span></h2>
+      <div class="scroll"><table id="scorecard"></table></div>
+      <h3>Position-weighted share of voice</h3>
+      <p class="hint">Each answer gives the first brand named 1 point, the second ½, the third ⅓, and so on. Share = a brand’s points ÷ all points.</p>
+      <div id="sovChart"></div>
+    </section>
+
+    <section class="card two">
+      <div><h2>By engine</h2><p class="hint">Mention rate per assistant.</p><div class="scroll" id="engineHeat"></div></div>
+      <div><h2>By buying stage</h2><p class="hint">Mention rate per prompt intent.</p><div class="scroll" id="intentHeat"></div></div>
+    </section>
+
+    <section class="card" id="trendCard" hidden>
+      <h2>Trend between snapshots</h2>
+      <div class="scroll"><table id="trend"></table></div>
+    </section>
+
+    <section class="card">
+      <h2>Prompt gaps</h2>
+      <p class="hint">Prompts where competitors are named but your brand is missing in at least one engine, ranked by how many engines miss you × how many rivals appear.</p>
+      <div class="scroll"><table id="gaps"></table></div>
+    </section>
+
+    <section class="card">
+      <h2>Sources the engines cite</h2>
+      <p class="hint">Domains found in answers. A source that is mostly cited in answers <em>without</em> your brand is a PR, review-site or listing opportunity.</p>
+      <div class="scroll"><table id="domains"></table></div>
+    </section>
+
+    <section class="card">
+      <h2>Answer explorer</h2>
+      <div class="row"><select id="fEngine"></select><select id="fIntent"></select><label class="inline"><input type="checkbox" id="fMissing"> only answers missing my brand</label></div>
+      <div id="answers" class="answers"></div>
+    </section>
+  </div>
+
+  <section class="card" id="how">
+    <h2>How it works</h2>
+    <ul>
+      <li><strong>Mention rate</strong>: share of answers that name the brand (or an alias), with a 95% Wilson interval so small samples aren’t over-read.</li>
+      <li><strong>First-place rate</strong> and <strong>average rank</strong>: the order brands are first named in each answer.</li>
+      <li><strong>Share of voice</strong>: plain (mentions ÷ all brand mentions) and position-weighted (1, ½, ⅓…).</li>
+      <li><strong>Tone</strong>: a simple positive/negative word list applied to sentences that name the brand. It is a rough signal, not a sentiment model.</li>
+      <li><strong>Trend</strong>: mention rate between the last two snapshots with a two-proportion z-test.</li>
+      <li><strong>Limits</strong>: AI answers vary run to run. Run each prompt more than once per engine, keep the panel fixed between snapshots, and treat small differences with care.</li>
+    </ul>
+    <p class="hint">Demo data is synthetic: “Murmur”, its competitors, the “Assistant A/B/C” engines and every <code>.example</code> domain are fictional. Built by <a href="https://github.com/yashsarkar1806-creator">Yash Sarkar</a>. MIT licensed.</p>
+  </section>
+</main>
+<script type="module" src="src/app.js"></script>
+</body>
+</html>
